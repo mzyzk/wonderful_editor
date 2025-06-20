@@ -1,12 +1,11 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  username: postgres
-  password: password
-  host: localhost
-  port: 5432
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-
+  username: postgres
+  password: postgres
+  host: 127.0.0.1
+  port: 15432
 
 development:
   <<: *default
@@ -15,3 +14,8 @@ development:
 test:
   <<: *default
   database: wonderful_editor_test
+
+production:
+  <<: *default
+  database: wonderful_editor_production
+  password: <%= ENV['WONDERFUL-EDITOR_DATABASE_PASSWORD'] %>

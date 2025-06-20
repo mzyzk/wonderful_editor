@@ -1,17 +1,10 @@
-version: "3.8"
+version: "3.1"
 
 services:
-  db:
-    image: postgres:13
+  database:
+    image: postgres
     restart: always
     ports:
-      - "5432:5432"
+      - 15432:5432
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: wonderful_editor_development
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+      POSTGRES_PASSWORD: postgres
