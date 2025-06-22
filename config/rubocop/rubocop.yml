@@ -149,14 +149,8 @@ Metrics/PerceivedComplexity:
 
 #################### Naming ################################
 
-# has_ から始まるメソッドは許可する
-Naming/PredicateName:
-  ForbiddenPrefixes:
-    - "is_"
-    - "have_"
-  NamePrefix:
-    - "is_"
-    - "have_"
+Naming/PredicatePrefix:
+  Enabled: false
 
 # 3 文字未満だと指摘されるが、未使用を示す _ や e(rror), b(lock),
 # n(umber) といった 1 文字変数は頻出するし、前置詞(by, to, ...)や
