@@ -77,3 +77,7 @@ yarn-debug.log*
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+
+# ER図ファイル（rails-erd出力）
+erd.dot
+erd.pdf
