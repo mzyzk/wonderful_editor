@@ -19,3 +19,13 @@ production:
   <<: *default
   database: wonderful_editor_production
   password: <%= ENV['WONDERFUL-EDITOR_DATABASE_PASSWORD'] %>
+
+# CI テスト用 DB 設定ファイル
+test:
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  database: wonderful_editor_test
+  username: postgres
+  password: postgres
+  host: localhost
