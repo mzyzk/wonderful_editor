@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 
+require "English"
 def run(cmd)
   puts "▶ #{cmd}"
   system(cmd)
-  unless $?.success?
+  unless $CHILD_STATUS.success?
     puts "❌ Command failed: #{cmd}"
     exit(1)
   end
