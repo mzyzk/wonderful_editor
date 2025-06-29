@@ -1,9 +1,5 @@
-module Api
-  module V1
-    class ArticlesController < ApplicationController
-      def index
-        render json: { message: "API is working!" }
-      end
-    end
+class Api::V1::ArticlesController < ApplicationController
+  def index
+    # 実装予定
   end
 end
