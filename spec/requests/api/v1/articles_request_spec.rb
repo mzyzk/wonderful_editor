@@ -28,4 +28,21 @@ RSpec.describe "Api::V1::Articles", type: :request do
       end
     end
   end
+
+  describe "GET /api/v1/articles/:id" do
+    let(:article) { create(:article) }
+
+    it "returns a specific article" do
+      get "/api/v1/articles/#{article.id}"
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["id"]).to eq(article.id)
+      expect(json["title"]).to eq(article.title)
+      expect(json["user_name"]).to eq(article.user.name)
+    end
+    it "returns 404 if article is not found" do
+      get "/api/v1/articles/0"
+      expect(response).to have_http_status(:not_found)
+    end
+  end
 end
