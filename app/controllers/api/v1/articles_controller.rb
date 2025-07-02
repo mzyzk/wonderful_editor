@@ -13,4 +13,21 @@ class Api::V1::ArticlesController < ApplicationController
       head :not_found
     end
   end
+
+  def create
+    article = Article.new(article_params)
+    article.user = User.first # 仮置き（Task8でcurrent_userに変更）
+
+    if article.save
+      render json: article, status: :created
+    else
+      render json: { errors: article.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+    def article_params
+      params.require(:article).permit(:title, :body)
+    end
 end

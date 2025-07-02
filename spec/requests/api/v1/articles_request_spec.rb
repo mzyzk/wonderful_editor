@@ -45,4 +45,36 @@ RSpec.describe "Api::V1::Articles", type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe "POST /api/v1/articles" do
+    let!(:user) { create(:user) }
+    let(:valid_params) { { article: { title: "Hello", body: "World" } } }
+
+    it "creates a new article" do
+      post "/api/v1/articles", params: valid_params
+      expect(response).to have_http_status(:created)
+
+      json = JSON.parse(response.body)
+      expect(json["title"]).to eq("Hello")
+      expect(json["body"]).to eq("World")
+    end
+    describe "POST /api/v1/articles" do
+      let(:user) { create(:user) }
+      before { user }
+      let(:valid_params) { { article: { title: "Hello", body: "World" } } }
+
+      it "creates a new article" do
+        post "/api/v1/articles", params: valid_params
+        expect(response).to have_http_status(:created)
+        json = JSON.parse(response.body)
+        expect(json["title"]).to eq("Hello")
+        expect(json["body"]).to eq("World")
+      end
+
+      it "returns error when params are invalid" do
+        post "/api/v1/articles", params: { article: { title: "" } }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+  end
 end
