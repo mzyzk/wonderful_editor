@@ -77,4 +77,45 @@ RSpec.describe "Api::V1::Articles", type: :request do
       end
     end
   end
+
+  describe "PATCH /api/v1/articles/:id" do
+    let(:user) { create(:user) }
+    let!(:article) { create(:article, user: user) }
+
+    before { user }
+
+    context "with valid parameters" do
+      let(:update_params) do
+        {
+          article: {
+            title: "Updated Title",
+            body: "Updated Body",
+          },
+        }
+      end
+
+      it "updates the article" do
+        patch "/api/v1/articles/#{article.id}", params: update_params
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+        expect(json["title"]).to eq("Updated Title")
+        expect(json["body"]).to eq("Updated Body")
+      end
+    end
+
+    context "with invalid parameters" do
+      let(:invalid_params) do
+        {
+          article: {
+            title: "",
+          },
+        }
+      end
+
+      it "returns error when title is blank" do
+        patch "/api/v1/articles/#{article.id}", params: invalid_params
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+  end
 end

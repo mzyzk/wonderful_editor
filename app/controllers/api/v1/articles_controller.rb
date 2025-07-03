@@ -25,9 +25,19 @@ class Api::V1::ArticlesController < ApplicationController
     end
   end
 
-  private
+  def update
+    article = Article.find(params[:id])
 
-    def article_params
-      params.require(:article).permit(:title, :body)
+    if article.update(article_params)
+      render json: article
+    else
+      render json: { errors: article.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+private
+
+  def article_params
+    params.require(:article).permit(:title, :body)
+  end
 end
