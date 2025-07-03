@@ -118,4 +118,17 @@ RSpec.describe "Api::V1::Articles", type: :request do
       end
     end
   end
+
+  describe "DELETE /api/v1/articles/:id" do
+    let(:user) { create(:user) }
+    let!(:article) { create(:article, user: user) }
+
+    it "deletes the article" do
+      expect {
+        delete "/api/v1/articles/#{article.id}"
+      }.to change(Article, :count).by(-1)
+
+      expect(response).to have_http_status(:no_content)
+    end
+  end
 end
