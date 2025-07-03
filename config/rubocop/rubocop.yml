@@ -416,3 +416,7 @@ Style/HashTransformKeys:
 # version 1 からは強制 true
 Style/HashTransformValues:
   Enabled: true
+
+# private や protected などのアクセス修飾子の位置と、それに続くメソッドのインデントを同列にする（追加）
+Layout/AccessModifierIndentation:
+  EnforcedStyle: outdent
