@@ -35,6 +35,12 @@ class Api::V1::ArticlesController < ApplicationController
     end
   end
 
+  def destroy
+    article = Article.find(params[:id])
+    article.destroy!
+    head :no_content
+  end
+
 private
 
   def article_params
