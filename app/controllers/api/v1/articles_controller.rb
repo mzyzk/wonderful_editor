@@ -1,4 +1,5 @@
-class Api::V1::ArticlesController < ApplicationController
+# app/controller/api/v1/articles_controller.rb
+class Api::V1::ArticlesController < Api::V1::BaseApiController
   def index
     articles = Article.order(updated_at: :desc)
     render json: articles, each_serializer:

@@ -1,3 +1,4 @@
+# spec/requests/api/v1/article_request_spec.rb
 require "rails_helper"
 RSpec.describe "Api::V1::Articles", type: :request do
   describe "GET /api/v1/articles" do
