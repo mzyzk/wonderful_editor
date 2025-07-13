@@ -1,29 +1,34 @@
+# spec/requests/api/v1/article_request_spec.rb
 require "rails_helper"
+
 RSpec.describe "Api::V1::Articles", type: :request do
+  let(:user) { create(:user) }
+  let(:headers) { user.create_new_auth_token }
+
   describe "GET /api/v1/articles" do
-    context "記事が複数あるとき" do
+    context "when multiple articles exist" do
       before do
-        create(:article, title: "古い記事", updated_at: 1.day.ago)
-        create(:article, title: "新しい記事", updated_at: Time.current)
+        create(:article, title: "Old Article", updated_at: 1.day.ago)
+        create(:article, title: "New Article", updated_at: Time.current)
         get "/api/v1/articles"
       end
 
-      it "更新順に整列されていること" do
-        expect(json.first["title"]).to eq("新しい記事")
+      it "returns articles ordered by updated_at descending" do
+        expect(json.first["title"]).to eq("New Article")
       end
     end
 
-    context "記事が1件あるとき" do
+    context "when a single article exists" do
       before do
-        create(:article, title: "単体テスト用")
+        create(:article, title: "Single Test Article")
         get "/api/v1/articles"
       end
 
-      it "必要なキーが含まれていること" do
+      it "includes required keys in the response" do
         expect(json.first.keys).to include("id", "title", "updated_at")
       end
 
-      it "不要なキーが含まれていないこと" do
+      it "does not include unnecessary keys" do
         expect(json.first).not_to have_key("body")
       end
     end
@@ -32,7 +37,7 @@ RSpec.describe "Api::V1::Articles", type: :request do
   describe "GET /api/v1/articles/:id" do
     let(:article) { create(:article) }
 
-    it "returns a specific article" do
+    it "returns the specific article" do
       get "/api/v1/articles/#{article.id}"
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -40,49 +45,37 @@ RSpec.describe "Api::V1::Articles", type: :request do
       expect(json["title"]).to eq(article.title)
       expect(json["user_name"]).to eq(article.user.name)
     end
-    it "returns 404 if article is not found" do
+
+    it "returns 404 if the article is not found" do
       get "/api/v1/articles/0"
       expect(response).to have_http_status(:not_found)
     end
   end
 
   describe "POST /api/v1/articles" do
-    let!(:user) { create(:user) }
     let(:valid_params) { { article: { title: "Hello", body: "World" } } }
 
-    it "creates a new article" do
-      post "/api/v1/articles", params: valid_params
-      expect(response).to have_http_status(:created)
-
-      json = JSON.parse(response.body)
-      expect(json["title"]).to eq("Hello")
-      expect(json["body"]).to eq("World")
-    end
-    describe "POST /api/v1/articles" do
-      let(:user) { create(:user) }
-      before { user }
-      let(:valid_params) { { article: { title: "Hello", body: "World" } } }
-
+    context "with valid parameters" do
       it "creates a new article" do
-        post "/api/v1/articles", params: valid_params
+        post "/api/v1/articles", params: valid_params, headers: headers
         expect(response).to have_http_status(:created)
+
         json = JSON.parse(response.body)
         expect(json["title"]).to eq("Hello")
         expect(json["body"]).to eq("World")
       end
+    end
 
-      it "returns error when params are invalid" do
-        post "/api/v1/articles", params: { article: { title: "" } }
+    context "with invalid parameters" do
+      it "returns an error when the title is blank" do
+        post "/api/v1/articles", params: { article: { title: "" } }, headers: headers
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
 
   describe "PATCH /api/v1/articles/:id" do
-    let(:user) { create(:user) }
     let!(:article) { create(:article, user: user) }
-
-    before { user }
 
     context "with valid parameters" do
       let(:update_params) do
@@ -95,7 +88,7 @@ RSpec.describe "Api::V1::Articles", type: :request do
       end
 
       it "updates the article" do
-        patch "/api/v1/articles/#{article.id}", params: update_params
+        patch "/api/v1/articles/#{article.id}", params: update_params, headers: headers
         expect(response).to have_http_status(:ok)
         json = JSON.parse(response.body)
         expect(json["title"]).to eq("Updated Title")
@@ -112,20 +105,19 @@ RSpec.describe "Api::V1::Articles", type: :request do
         }
       end
 
-      it "returns error when title is blank" do
-        patch "/api/v1/articles/#{article.id}", params: invalid_params
+      it "returns an error when the title is blank" do
+        patch "/api/v1/articles/#{article.id}", params: invalid_params, headers: headers
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
 
   describe "DELETE /api/v1/articles/:id" do
-    let(:user) { create(:user) }
     let!(:article) { create(:article, user: user) }
 
     it "deletes the article" do
       expect {
-        delete "/api/v1/articles/#{article.id}"
+        delete "/api/v1/articles/#{article.id}", headers: headers
       }.to change(Article, :count).by(-1)
 
       expect(response).to have_http_status(:no_content)
