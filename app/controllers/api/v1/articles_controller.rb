@@ -19,7 +19,7 @@ class Api::V1::ArticlesController < Api::V1::BaseApiController
 
   def create
     article = Article.new(article_params)
-    article.user = User.first # 仮置き（Task8でcurrent_userに変更）
+    article.user = current_user
 
     if article.save
       render json: article, status: :created
@@ -40,6 +40,8 @@ class Api::V1::ArticlesController < Api::V1::BaseApiController
 
   def destroy
     article = Article.find(params[:id])
+    return head :forbidden unless article.user == current_user
+
     article.destroy!
     head :no_content
   end
