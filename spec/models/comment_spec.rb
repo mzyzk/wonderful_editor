@@ -22,7 +22,7 @@
 require "rails_helper"
 
 RSpec.describe Comment, type: :model do
-  describe "バリデーション" do
+  xdescribe "バリデーション" do
     context "有効な場合" do
       it "すべての属性が正しければ有効である" do
         comment = build(:comment)

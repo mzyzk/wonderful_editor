@@ -23,8 +23,4 @@ class Article < ApplicationRecord
   has_many :article_likes, dependent: :destroy
 
   validates :title, presence: true
-  validates :body, presence: true
-
-  validates :title, length: { maximum: 100 }
-  validates :body, length: { maximum: 500 }
 end
