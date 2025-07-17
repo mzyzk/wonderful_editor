@@ -16,43 +16,27 @@
 # Foreign Keys
 #
 #  fk_rails_...  (user_id => users.id)
-#
+
+# articles_spec.rb
 require "rails_helper"
 
-RSpec.describe Article, type: :model do
-  xdescribe "バリデーション" do
-    context "有効な場合" do
-      it "すべての属性が正しければ有効である" do
-        article = build(:article)
-        expect(article).to be_valid
-        # 渡す時はシンボルだとインスタンスじゃないので注意！
-      end
-    end
+RSpec.describe "Api::V1::Articles", type: :request do
+  describe "GET /articles" do
+    subject { get(api_v1_articles_path) }
 
-    context "無効な場合" do
-      it "タイトルが空だと無効である" do
-        article = build(:article, title: nil)
-        expect(article).not_to be_valid
-        expect(article.errors[:title]).to include("can't be blank")
-      end
+    let!(:article1) { create(:article, updated_at: 1.days.ago) }
+    let!(:article2) { create(:article, updated_at: 2.days.ago) }
+    let!(:article3) { create(:article) }
 
-      it "タイトルが100字を超えると無効である" do
-        article = build(:article, title: "a" * 101)
-        expect(article).not_to be_valid
-        expect(article.errors[:title]).to include("is too long (maximum is 100 characters)")
-      end
+    it "retrieves the list of articles" do
+      subject
+      res = JSON.parse(response.body)
 
-      it "本文が空だと無効である" do
-        article = build(:article, body: nil)
-        expect(article).not_to be_valid
-        expect(article.errors[:body]).to include("can't be blank")
-      end
-
-      it "本文が500字を超えると無効である" do
-        article = build(:article, body: "a" * 501)
-        expect(article).not_to be_valid
-        expect(article.errors[:body]).to include("is too long (maximum is 500 characters)")
-      end
+      expect(response).to have_http_status(:ok)
+      expect(res.length).to eq 3
+      expect(res.map {|d| d["id"] }).to eq [article3.id, article1.id, article2.id]
+      expect(res[0].keys).to eq ["id", "title", "updated_at", "user"]
+      expect(res[0]["user"].keys).to eq ["id", "name", "email"]
     end
   end
 end

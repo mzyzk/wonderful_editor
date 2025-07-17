@@ -1,54 +1,9 @@
 # app/controller/api/v1/articles_controller.rb
-class Api::V1::ArticlesController < Api::V1::BaseApiController
-  before_action :authenticate_user!, only: [:create, :update, :destroy]
-
-  def index
-    articles = Article.order(updated_at: :desc)
-    render json: articles, each_serializer:
-    Api::V1::ArticlePreviewSerializer
-  end
-
-  def show
-    article = Article.find_by(id: params[:id])
-    if article
-      render json: article
-    else
-      head :not_found
+module Api::V1
+  class ArticlesController < BaseApiController
+    def index
+      articles = Article.order(updated_at: :desc)
+      render json: articles, each_serializer: Api::V1::ArticlePreviewSerializer
     end
-  end
-
-  def create
-    article = Article.new(article_params)
-    article.user = current_user
-
-    if article.save
-      render json: article, status: :created
-    else
-      render json: { errors: article.errors.full_messages }, status: :unprocessable_entity
-    end
-  end
-
-  def update
-    article = Article.find(params[:id])
-
-    if article.update(article_params)
-      render json: article
-    else
-      render json: { errors: article.errors.full_messages }, status: :unprocessable_entity
-    end
-  end
-
-  def destroy
-    article = Article.find(params[:id])
-    return head :forbidden unless article.user == current_user
-
-    article.destroy!
-    head :no_content
-  end
-
-private
-
-  def article_params
-    params.require(:article).permit(:title, :body)
   end
 end
