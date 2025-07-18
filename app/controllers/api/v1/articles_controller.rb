@@ -1,54 +1,36 @@
 # app/controller/api/v1/articles_controller.rb
-class Api::V1::ArticlesController < Api::V1::BaseApiController
-  before_action :authenticate_user!, only: [:create, :update, :destroy]
-
-  def index
-    articles = Article.order(updated_at: :desc)
-    render json: articles, each_serializer:
-    Api::V1::ArticlePreviewSerializer
-  end
-
-  def show
-    article = Article.find_by(id: params[:id])
-    if article
-      render json: article
-    else
-      head :not_found
+module Api::V1
+  class ArticlesController < BaseApiController
+    def index
+      articles = Article.order(updated_at: :desc)
+      render json: articles, each_serializer: Api::V1::ArticlePreviewSerializer
     end
-  end
 
-  def create
-    article = Article.new(article_params)
-    article.user = current_user
-
-    if article.save
-      render json: article, status: :created
-    else
-      render json: { errors: article.errors.full_messages }, status: :unprocessable_entity
+    def show
+      article = Article.find(params[:id])
+      render json: article, serializer: Api::V1::ArticleSerializer
     end
-  end
 
-  def update
-    article = Article.find(params[:id])
-
-    if article.update(article_params)
-      render json: article
-    else
-      render json: { errors: article.errors.full_messages }, status: :unprocessable_entity
+    def create
+      article = current_user.articles.create!(article_params)
+      render json: article, serializer: Api::V1::ArticleSerializer
     end
-  end
 
-  def destroy
-    article = Article.find(params[:id])
-    return head :forbidden unless article.user == current_user
+    def update
+      article = current_user.articles.find(params[:id])
+      article.update!(article_params)
+      render json: article, serializer: Api::V1::ArticleSerializer
+    end
 
-    article.destroy!
-    head :no_content
-  end
+    def destroy
+      article = current_user.articles.find(params[:id])
+      article.destroy!
+    end
 
-private
+  private
 
-  def article_params
-    params.require(:article).permit(:title, :body)
+    def article_params
+      params.require(:article).permit(:title, :body)
+    end
   end
 end
