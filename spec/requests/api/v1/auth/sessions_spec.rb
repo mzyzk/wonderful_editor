@@ -59,21 +59,22 @@ RSpec.describe "Api::V1::Auth::Sessions", type: :request do
       let(:user) { create(:user) }
       let!(:headers) { user.create_new_auth_token }
 
-    it "logs out successfully" do
-      expect { subject }.to change { user.reload.tokens }.from(be_present).to(be_blank)
-      expect(response).to have_http_status(:ok)
+      it "logs out successfully" do
+        expect { subject }.to change { user.reload.tokens }.from(be_present).to(be_blank)
+        expect(response).to have_http_status(:ok)
+      end
     end
-  end
 
-  context "when invalid headers are provided" do
-    let(:user) { create(:user) }
-    let!(:headers) { { "access-token" => "", "token-type" => "", "client" => "", "expiry" => "", "uid" => "" } }
+    context "when invalid headers are provided" do
+      let(:user) { create(:user) }
+      let!(:headers) { { "access-token" => "", "token-type" => "", "client" => "", "expiry" => "", "uid" => "" } }
 
-    it "fails to log out" do
-      subject
-      expect(response).to have_http_status(:not_found)
-      res = JSON.parse(response.body)
-      expect(res["errors"]).to include "User was not found or was not logged in."
+      it "fails to log out" do
+        subject
+        expect(response).to have_http_status(:not_found)
+        res = JSON.parse(response.body)
+        expect(res["errors"]).to include "User was not found or was not logged in."
+      end
     end
   end
 end
