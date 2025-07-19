@@ -4,6 +4,7 @@
 #
 #  id         :bigint           not null, primary key
 #  body       :text
+#  status     :integer
 #  title      :string
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -16,6 +17,7 @@
 # Foreign Keys
 #
 #  fk_rails_...  (user_id => users.id)
+#
 
 # articles_spec.rb
 require "rails_helper"
@@ -39,6 +41,7 @@ RSpec.describe "Api::V1::Articles", type: :request do
       expect(res[0]["user"].keys).to eq ["id", "name", "email"]
     end
   end
+
   describe "GET /articles/:id" do
     subject { get(api_v1_article_path(article_id)) }
 
@@ -66,6 +69,20 @@ RSpec.describe "Api::V1::Articles", type: :request do
       it "raises a not found error" do
         expect { subject }.to raise_error ActiveRecord::RecordNotFound
       end
+    end
+  end
+
+  describe "status" do
+    it "can be saved as draft" do
+      article = create(:article, status: :draft)
+      expect(article).to be_valid
+      expect(article.draft?).to be true
+    end
+
+    it "can be saved as published" do
+      article = create(:article, status: :published)
+      expect(article).to be_valid
+      expect(article.published?).to be true
     end
   end
 end
