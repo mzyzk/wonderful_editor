@@ -1,78 +1,61 @@
+# spec/requests/api/v1/auth/registrations_spec.rb
 require "rails_helper"
 
-RSpec.describe "User Registration API", type: :request do
-  xdescribe "POST /api/v1/auth" do
-    let(:valid_params) do
-      {
-        email: "test@example.com",
-        password: "password",
-        password_confirmation: "password",
-      }
-    end
+RSpec.describe "Api/V1::Auth::Registrations", type: :request do
+  describe "POST /v1/auth" do
+    subject { post(api_v1_user_registration_path, params: params) }
 
-    context "when the request is valid" do
-      it "creates a new user and returns status 200" do
-        post "/api/v1/auth", params: valid_params
+    context "when all required information is provided" do
+      let(:params) { attributes_for(:user) }
 
+      it "registers a new user" do
+        expect { subject }.to change { User.count }.by(1)
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)["data"]["email"]).to eq(valid_params[:email])
-        expect(response.headers).to include("access-token", "client", "uid")
+        res = JSON.parse(response.body)
+        expect(res["data"]["email"]).to eq(User.last.email)
+      end
+
+      it "returns header information" do
+        subject
+        header = response.header
+        expect(header["access-token"]).to be_present
+        expect(header["client"]).to be_present
+        expect(header["expiry"]).to be_present
+        expect(header["uid"]).to be_present
+        expect(header["token-type"]).to be_present
       end
     end
 
-    context "when the request is invalid" do
-      it "returns a 422 with error messages" do
-        invalid_params = valid_params.merge(password_confirmation: "wrong")
+    context "when name is missing" do
+      let(:params) { attributes_for(:user, name: nil) }
 
-        post "/api/v1/auth", params: invalid_params
+      it "returns an error" do
+        expect { subject }.to change { User.count }.by(0)
+        res = JSON.parse(response.body)
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to have_key("errors")
-      end
-    end
-    context "when email is already token" do
-      before { User.create!(email: valid_params[:email], password: "password", password_confirmation: "password") }
-
-      it "returns 422 with error" do
-        post "/api/v1/auth", params: valid_params
-
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to have_key("errors")
+        expect(res["errors"]["name"]).to include "can't be blank"
       end
     end
 
-    context "when email is blank" do
-      it "returns 422 with error" do
-        post "/api/v1/auth", params: valid_params.merge(email: "")
+    context "when email is missing" do
+      let(:params) { attributes_for(:user, email: nil) }
 
+      it "returns an error" do
+        expect { subject }.to change { User.count }.by(0)
+        res = JSON.parse(response.body)
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to have_key("errors")
+        expect(res["errors"]["email"]).to include "can't be blank"
       end
     end
 
-    context "when password is too short" do
-      it "returns 422 with error" do
-        post "/api/v1/auth", params: valid_params.merge(password: "123", password_confirmation: "123")
+    context "when password is missing" do
+      let(:params) { attributes_for(:user, password: nil) }
 
+      it "returns an error" do
+        expect { subject }.to change { User.count }.by(0)
+        res = JSON.parse(response.body)
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to have_key("errors")
-      end
-    end
-
-    context "when password confirmation does not match" do
-      it "returns 422 with error" do
-        post "/api/v1/auth", params: valid_params.merge(password_confirmation: "wrong")
-
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to have_key("errors")
-      end
-    end
-
-    context "when password confirmation is blank" do
-      it "returns 422 with error" do
-        post "/api/v1/auth", params: valid_params.merge(password_confirmation: "")
-
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to have_key("errors")
+        expect(res["errors"]["password"]).to include "can't be blank"
       end
     end
   end

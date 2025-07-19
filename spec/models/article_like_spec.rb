@@ -21,7 +21,7 @@
 require "rails_helper"
 
 RSpec.describe ArticleLike, type: :model do
-  xdescribe "バリデーション" do
+  describe "バリデーション" do
     context "有効な場合" do
       it "同じユーザーが別の記事にいいねできる" do
         user = create(:user)
