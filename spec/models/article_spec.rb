@@ -85,4 +85,14 @@ RSpec.describe "Api::V1::Articles", type: :request do
       expect(article.published?).to be true
     end
   end
+
+  describe "GET /api/v1/articles" do
+    it "does not return draft articles" do
+      create(:article, status: :draft)
+      create(:article, status: :published)
+      get "/api/v1/articles"
+      json = JSON.parse(response.body)
+      expect(json.length).to eq(1)
+    end
+  end
 end
