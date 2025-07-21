@@ -15,6 +15,10 @@ Rails.application.routes.draw do
       get "articles/drafts", to: "articles/drafts#index"
       get "articles/drafts/:id", to: "articles/drafts#show"
       resources :articles
+
+      namespace :current do
+        resources :articles, only: [:index]
+      end
     end
   end
 end
