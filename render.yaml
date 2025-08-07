@@ -4,7 +4,7 @@ services:
     env: ruby
     region: singapore
     plan: free
-    branch: deploy/wonderful_editor_final
+    branch: develop
     numInstances: 1
     healthCheckPath: /
     buildCommand: ./bin/render-build.sh
